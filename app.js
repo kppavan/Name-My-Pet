@@ -20,26 +20,19 @@ const openai = new OpenAIApi(configuration);
 async function handleRequest(req, res) {
   let result;
   if (!configuration.apiKey) {
-    res.status(500).json({
-      error: {
-        message: "OpenAI API key not configured",
-      },
-    });
+    console.log("Api configuration error");
     return;
   }
   const animal = req.body.animal || "";
   if (animal.trim().length === 0) {
-    res.status(400).json({
-      error: {
-        message: "Please enter a valid animal",
-      },
-    });
+    res.status(400).send("<h1>Invalid Animal Name</h1>");
     return;
   }
   try {
+    const category = req.body.category;
     const completion = await openai.createCompletion({
       model: "text-davinci-003",
-      prompt: generatePrompt(animal),
+      prompt: generatePrompt(animal, category),
       temperature: 0.6,
     });
     result = completion.data.choices[0].text;
@@ -60,10 +53,10 @@ async function handleRequest(req, res) {
   }
 }
 // Generate the names
-function generatePrompt(animal) {
+function generatePrompt(animal, category) {
   const capitalizedAnimal =
     animal[0].toUpperCase() + animal.slice(1).toLowerCase();
-  return `Suggest three names for an animal that is a superhero.
+  return `Suggest three names for an animal that is a ${category}.
   
   Animal: Cat
   Names: Captain Sharpclaw, Agent Fluffball, The Incredible Feline
